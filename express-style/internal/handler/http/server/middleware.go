@@ -6,13 +6,33 @@ import (
 	"os"
 )
 
-func (s *server) AuthRequire() func(*fiber.Ctx) error {
-	user := os.Getenv("USERNAME")
-	pass := os.Getenv("PASSWORD")
+func (s *server) AuthRequire() fiber.Handler {
+
+	u := os.Getenv("U_NAME")
+	p := os.Getenv("U_PASS")
+
 	cfg := basicauth.Config{
 		Users: map[string]string{
-			user: pass,
+			u: p,
+		},
+		Authorizer: func(user string, pass string) bool {
+			if user == "" || pass == "" {
+				return false
+			} else if user == u && pass == p {
+				return true
+			} else {
+				return false
+			}
+		},
+		Unauthorized: func(ctx *fiber.Ctx) error {
+			return ctx.Status(fiber.StatusUnauthorized).JSON(
+				&fiber.Map{
+					"success": false,
+					"message": "Unauthorized",
+				},
+			)
 		},
 	}
+
 	return basicauth.New(cfg)
 }

@@ -5,6 +5,7 @@ import (
 )
 
 type ProductService interface {
+	InsertDummyData() error
 	CreateProduct(model *product.Product) error
 	GetAllProducts() ([]*product.Product, error)
 	GetSingleProduct(id int64) (*product.Product, error)

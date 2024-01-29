@@ -2,12 +2,30 @@ package product
 
 import (
 	"express-style/internal/repository/product/dao"
+	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/pkg/errors"
 	"github.com/upper/db/v4"
 )
 
 func (r *repository) InsertDummyData() error {
+	for i := 0; i < 10_000; {
+		prod := gofakeit.Product()
+
+		_, err := r.storage.Session().SQL().InsertInto("products").Values(
+			&dao.ProductDAO{
+				Amount:      int64(gofakeit.IntRange(5, 70)),
+				Name:        prod.Name,
+				Description: prod.Description,
+				Category:    prod.Categories[0],
+			},
+		).Exec()
+		if err != nil {
+			log.Error(err)
+		}
+
+		i++
+	}
 
 	return nil
 }
@@ -33,7 +51,13 @@ func (r *repository) GetAllProducts() ([]*dao.ProductDAO, error) {
 }
 
 func (r *repository) GetSingleProduct(id int64) (*dao.ProductDAO, error) {
-	return nil, nil
+	var d dao.ProductDAO
+	err := r.storage.Session().Get(&d, db.Cond{"id": id})
+	if err != nil {
+		return nil, errors.New("repo: error get single product")
+	}
+
+	return &d, nil
 }
 
 func (r *repository) UpdateProduct(model *dao.ProductDAO) error {

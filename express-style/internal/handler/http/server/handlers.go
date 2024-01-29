@@ -8,6 +8,21 @@ import (
 	"github.com/pkg/errors"
 )
 
+func (s *server) InsertDummyData(c *fiber.Ctx) error {
+	c.Set("Content-Type", "application/json")
+	err := s.productService.InsertDummyData()
+	if err != nil {
+		log.Error(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			&fiber.Map{
+				"success": false,
+				"message": err.Error(),
+			},
+		)
+	}
+	return nil
+}
+
 func (s *server) CreateProduct(c *fiber.Ctx) error {
 	c.Set("Content-Type", "application/json")
 	p := new(product.Product)
@@ -31,7 +46,7 @@ func (s *server) CreateProduct(c *fiber.Ctx) error {
 			},
 		)
 	} else {
-		log.Debug("Product created: ", p)
+		log.Debugf("Product created: %+v", p)
 		return c.Status(fiber.StatusCreated).JSON(
 			&fiber.Map{
 				"success": true,
@@ -53,34 +68,49 @@ func (s *server) GetAllProducts(c *fiber.Ctx) error {
 			},
 		)
 	}
-	bytes, err := json.Marshal(prods)
-	if err != nil {
-		log.Error("Error json marshalling")
-		return c.Status(fiber.StatusInternalServerError).JSON(
-			&fiber.Map{
-				"success": false,
-				"message": errors.New("Error json marshalling"),
-			},
-		)
-	}
 
-	_, err = c.Write(bytes)
-	if err != nil {
-		log.Error("Error writing data to body")
-		return c.Status(fiber.StatusInternalServerError).JSON(
-			&fiber.Map{
-				"success": false,
-				"message": errors.New("Error writing data body"),
-			},
-		)
-	} else {
-		log.Debug("All products: ", &prods)
-		return nil
-	}
+	log.Debugf("All products: %+v", prods)
+	return c.Status(fiber.StatusOK).JSON(
+		&fiber.Map{
+			"success":  true,
+			"products": prods,
+			"message":  "All products returned successfully",
+		},
+	)
 }
 
 func (s *server) GetSingleProduct(c *fiber.Ctx) error {
-	return nil
+	c.Set("Content-Type", "application/json")
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		log.Error("Error get params: ", err)
+		return c.Status(fiber.StatusBadRequest).JSON(
+			&fiber.Map{
+				"success": false,
+				"message": err.Error(),
+			},
+		)
+	}
+
+	prod, err := s.productService.GetSingleProduct(int64(id))
+	if err != nil {
+		log.Error(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			&fiber.Map{
+				"success": false,
+				"message": err.Error(),
+			},
+		)
+	}
+
+	log.Debugf("Single product: %+v", prod)
+	return c.Status(fiber.StatusOK).JSON(
+		&fiber.Map{
+			"success":  true,
+			"products": prod,
+			"message":  "Single product returned successfully",
+		},
+	)
 }
 
 func (s *server) DeleteProduct(c *fiber.Ctx) error {
@@ -114,5 +144,10 @@ func (s *server) GetSettings(c *fiber.Ctx) error {
 }
 
 func (s *server) Bind(c *fiber.Ctx) error {
+	return nil
+}
+
+func (s *server) Logout(c *fiber.Ctx) error {
+	c.Status(fiber.StatusUnauthorized)
 	return nil
 }

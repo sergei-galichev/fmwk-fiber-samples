@@ -5,6 +5,7 @@ import (
 )
 
 type ProductRepository interface {
+	InsertDummyData() error
 	CreateProduct(model *dao.ProductDAO) error
 	GetAllProducts() ([]*dao.ProductDAO, error)
 	GetSingleProduct(id int64) (*dao.ProductDAO, error)

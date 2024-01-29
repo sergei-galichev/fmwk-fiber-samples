@@ -5,22 +5,27 @@ import (
 	"express-style/internal/service/product/converter"
 )
 
-func (r *service) CreateProduct(model *product.Product) error {
-	return r.productRepository.CreateProduct(converter.DomainToDAO(model))
+func (s *service) InsertDummyData() error {
+	return s.productRepository.InsertDummyData()
 }
 
-func (r *service) GetAllProducts() ([]*product.Product, error) {
-	return converter.DAOsToDomains(r.productRepository.GetAllProducts())
+func (s *service) CreateProduct(model *product.Product) error {
+	return s.productRepository.CreateProduct(converter.DomainToDAO(model))
 }
 
-func (r *service) GetSingleProduct(id int64) (*product.Product, error) {
-	return nil, nil
+func (s *service) GetAllProducts() ([]*product.Product, error) {
+	return converter.DAOsToDomains(s.productRepository.GetAllProducts())
 }
 
-func (r *service) UpdateProduct(model *product.Product) error {
+func (s *service) GetSingleProduct(id int64) (*product.Product, error) {
+	d, err := s.productRepository.GetSingleProduct(id)
+	return converter.DAOToDomain(d), err
+}
+
+func (s *service) UpdateProduct(model *product.Product) error {
 	return nil
 }
 
-func (r *service) DeleteProduct(id int64) error {
+func (s *service) DeleteProduct(id int64) error {
 	return nil
 }

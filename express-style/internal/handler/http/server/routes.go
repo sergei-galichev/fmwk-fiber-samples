@@ -1,34 +1,39 @@
 package server
 
 import (
-	"github.com/gofiber/fiber/v2/middleware/logger"
+	"github.com/gofiber/fiber/v2/middleware/monitor"
+	"github.com/gofiber/fiber/v2/middleware/pprof"
+	recoverFiber "github.com/gofiber/fiber/v2/middleware/recover"
 )
 
 func (s *server) SetupRoutes() {
-	//api := s.app.Group("/api/v1", logger.New(), s.AuthRequire())
-	api := s.app.Group("/api/v1/", logger.New())
-	//api.Static("/", "./web/static")
+	main := s.app.Group("/")
+	main.Get("/logout", s.Logout)
+	main.Get(
+		"/metrics", monitor.New(
+			monitor.Config{
+				Title: "My service Metrics Page",
+			},
+		),
+	)
 
-	// some test routes
-	//api.Use(
-	//	func(ctx *fiber.Ctx) error {
-	//		return ctx.Bind(
-	//			fiber.Map{
-	//				"Title": "My custom title",
-	//			},
-	//		)
-	//	},
-	//)
-	//api.Get(
-	//	"/bind", func(ctx *fiber.Ctx) error {
-	//		return ctx.Render("base.tmpl", fiber.Map{})
-	//	},
-	//)
+	api := s.app.Group("/api/v1/")
+
+	api.Use(
+		recoverFiber.New(),
+		s.AuthRequire(),
+		pprof.New(
+			pprof.Config{
+				Prefix: "/profiler",
+			},
+		),
+	)
+
 	api.Get("/settings", s.GetSettings)
 	api.Get("/params/*/*/*", s.PrintAllParams)
 	api.Get("/info", s.Info)
-	//
 
+	api.Post("/dummy", s.InsertDummyData)
 	api.Get("/", s.GetAllProducts)
 	api.Get("/:id", s.GetSingleProduct)
 	api.Post("/", s.CreateProduct)
