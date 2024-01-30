@@ -23,7 +23,8 @@ func NewServer(productService service.ProductService) *server {
 	app.Use(
 		logger.New(
 			logger.Config{
-				Format: "[${ip}]:${port} ${status} - ${method} ${path}\n",
+				Format:     "[${time}] [${ip}]:${port} ${status} ${latency} - ${method} ${path}\n",
+				TimeFormat: "2006/01/02 - 15:04:05",
 			},
 		),
 		cors.New(

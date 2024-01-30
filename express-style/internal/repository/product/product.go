@@ -50,6 +50,10 @@ func (r *repository) GetAllProducts() ([]*dao.ProductDAO, error) {
 	return prods, nil
 }
 
+func (r *repository) GetProducts(pageSize, pageNum uint) ([]*dao.ProductDAO, uint64, uint, error) {
+	return dao.Products(r.storage.Session()).GetProducts(pageSize, pageNum)
+}
+
 func (r *repository) GetSingleProduct(id int64) (*dao.ProductDAO, error) {
 	var d dao.ProductDAO
 	err := r.storage.Session().Get(&d, db.Cond{"id": id})

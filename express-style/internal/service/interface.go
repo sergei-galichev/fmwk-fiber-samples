@@ -8,6 +8,7 @@ type ProductService interface {
 	InsertDummyData() error
 	CreateProduct(model *product.Product) error
 	GetAllProducts() ([]*product.Product, error)
+	GetProducts(pageSize, pageNum uint) ([]*product.Product, uint64, uint, error)
 	GetSingleProduct(id int64) (*product.Product, error)
 	UpdateProduct(model *product.Product) error
 	DeleteProduct(id int64) error

@@ -79,6 +79,52 @@ func (s *server) GetAllProducts(c *fiber.Ctx) error {
 	)
 }
 
+func (s *server) GetProducts(c *fiber.Ctx) error {
+	c.Set("Content-Type", "application/json")
+	pageSize, err := c.ParamsInt("page_size", 10)
+	if err != nil {
+		log.Error("Error get params: ", err)
+		return c.Status(fiber.StatusBadRequest).JSON(
+			&fiber.Map{
+				"success": false,
+				"message": err.Error(),
+			},
+		)
+	}
+
+	pageNum, err := c.ParamsInt("page_num", 1)
+	if err != nil {
+		log.Error("Error get params: ", err)
+		return c.Status(fiber.StatusBadRequest).JSON(
+			&fiber.Map{
+				"success": false,
+				"message": err.Error(),
+			},
+		)
+	}
+
+	prods, count, pages, err := s.productService.GetProducts(uint(pageSize), uint(pageNum))
+	if err != nil {
+		log.Error(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(
+			&fiber.Map{
+				"success": false,
+				"message": err.Error(),
+			},
+		)
+	} else {
+		return c.Status(fiber.StatusOK).JSON(
+			&fiber.Map{
+				"success":  true,
+				"message":  "Products returned successfully",
+				"products": prods,
+				"count":    count,
+				"pages":    pages,
+			},
+		)
+	}
+}
+
 func (s *server) GetSingleProduct(c *fiber.Ctx) error {
 	c.Set("Content-Type", "application/json")
 	id, err := c.ParamsInt("id")
@@ -144,10 +190,5 @@ func (s *server) GetSettings(c *fiber.Ctx) error {
 }
 
 func (s *server) Bind(c *fiber.Ctx) error {
-	return nil
-}
-
-func (s *server) Logout(c *fiber.Ctx) error {
-	c.Status(fiber.StatusUnauthorized)
 	return nil
 }

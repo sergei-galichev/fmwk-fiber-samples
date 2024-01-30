@@ -8,7 +8,6 @@ import (
 
 func (s *server) SetupRoutes() {
 	main := s.app.Group("/")
-	main.Get("/logout", s.Logout)
 	main.Get(
 		"/metrics", monitor.New(
 			monitor.Config{
@@ -33,9 +32,10 @@ func (s *server) SetupRoutes() {
 	api.Get("/params/*/*/*", s.PrintAllParams)
 	api.Get("/info", s.Info)
 
-	api.Post("/dummy", s.InsertDummyData)
-	api.Get("/", s.GetAllProducts)
-	api.Get("/:id", s.GetSingleProduct)
-	api.Post("/", s.CreateProduct)
-	api.Delete("/:id", s.DeleteProduct)
+	api.Post("/product/dummy", s.InsertDummyData)
+	api.Get("/product/all", s.GetAllProducts)
+	api.Get("/product/:page_size/:page_num", s.GetProducts)
+	api.Get("/product/:id", s.GetSingleProduct)
+	api.Post("/product/", s.CreateProduct)
+	api.Delete("/product/:id", s.DeleteProduct)
 }
